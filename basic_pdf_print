@@ -1,0 +1,31 @@
+
+import arcpy  
+from arcpy import env  
+from arcpy import mapping  
+env.workspace = r"C:\GIS data"  
+  
+mxd = mapping.MapDocument(r"C:\GIS data\plan_review_mapscript.mxd")  
+  
+fc = "Q:\PlanREVIEW\PlanREVIEW.gdb\Planning_Reviews"  
+
+count = str(arcpy.GetCount_management(fc))  
+  
+x = 1  
+  
+while x < int(count) + 1:  
+    rows = arcpy.SearchCursor(fc, "OBJECTID = " + str(x))  
+    for row in rows:  
+        xmin = row.shape.extent.XMin  
+        ymin = row.shape.extent.YMin  
+        xmax = row.shape.extent.XMax  
+        ymax = row.shape.extent.YMax  
+        df = arcpy.mapping.ListDataFrames(mxd)[0]  
+        newExtent = df.extent  
+        newExtent.XMin, newExtent.YMin = xmin, ymin  
+        newExtent.XMax, newExtent.YMax = xmax, ymax  
+        df.extent = newExtent  
+        mapping.ExportToPDF(mxd, r"C:\GIS data\PDF_" + str(x) + ".pdf")  
+        print "successfully printed PDF"  
+    x += 1  
+
+//goes through each feature in Planning_Reviews feature class and prints up a pdf of each parcel.
